@@ -1,5 +1,7 @@
-function generatePopulation () {
-  return Array (100).fill (null).map (i => {
+const fs = require('fs');
+
+function generatePopulation (populationLength) {
+  return Array(populationLength).fill (null).map (i => {
     return {
       x1: Math.random () * 10,
       x2: Math.random () * 10,
@@ -157,15 +159,35 @@ function getMediumApt(population) {
     return population.reduce((totalApt, element) => totalApt += element.apt, 0)/population.length; 
 }
 
+function generateMatlabFile(worstData, bestData, mediumData, populationLength){
+	let string = "clc;\n" 
+	string += "clear;\n"
+	string += "ymelhor = [" + bestData + "];\n";
+	string += "ymedia = [" + mediumData + "];\n";
+	string += "ypior = [" + worstData + "];\n";
+	string += "xdata = [1:1:" + populationLength + "];\n";
+	string += "plot(xdata,ypior);\n";
+	string += "hold on;\n";
+	string += "plot(xdata,ymedia);\n";
+	string += "hold on;\n";
+	string += "plot(xdata,ymelhor);\n";
+	string += "hold on;\n";
+	return string;
+}
 
 function main() {
-    const crossoverRate = 0.7;
-    const mutationRate = 0.1;
+	const args = process.argv.slice(2);
+    const crossoverRate = Number(args[0]);
+    const mutationRate = Number(args[1]);
+    const populationLength = Number(args[2]);
+    const generations = Number(args[3]);
+    if(args.length != 4) {
+    	return console.log("Compilation Error !!!\nCompilation should be: \n    node fileName.js <crossoverRate> <mutationRate> <populationLength> <NumberOfGenerations>");
+    }
     const best = [];
     const worst = [];
     const medium = [];  
-    const generations = 100;  
-    let population = generatePopulation();
+    let population = generatePopulation(populationLength);
     population = fillInitialPopulation(population);
     for(let i=0; i < generations; i++) {
         population = rolet(population);
@@ -174,9 +196,14 @@ function main() {
         worst.push(getWorstApt(population));
         medium.push(getMediumApt(population));
     }
-    console.log(worst);
-    console.log('\n');
-    console.log(best);
+
+
+    fs.writeFile('output.m', generateMatlabFile(worst, best, medium, population.length), function(err) {
+    	if(err) {
+    		return console.log(err);
+    	}
+    	console.log("MatlabFile was saved!");
+    });
 }
 
 main();
