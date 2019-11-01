@@ -1,24 +1,28 @@
 const fs = require('fs');
 
+// function to generate the first population
 function generatePopulation (populationLength) {
-  return Array(populationLength).fill (null).map (i => {
+  return Array(populationLength).fill(null).map (i => {
     return {
-      x1: Math.random () * 10,
-      x2: Math.random () * 10,
+      x1: Math.random() * 10,
+      x2: Math.random() * 10,
       apt: null,
       sum: null,
     };
   });
 }
 
+// function to calculate fitness 
 function calculateApt (x1, x2) {
-  return Math.sqrt (x1) * Math.sin (x1) * Math.sqrt (x2) * Math.sin (x2) + 10;
+  return Math.sqrt(x1) * Math.sin(x1) * Math.sqrt(x2) * Math.sin(x2) + 10;
 }
 
+// function to get Random numbers between two numbers
 function getRandomArbitrary(min, max) {
     return Math.random() * (max - min) + min;
-  }
+}
 
+// function to crossover childs
 function crossover (population, crossoverRate) {
     let newPopulation = [];
     let total = 0;
@@ -65,6 +69,7 @@ function crossover (population, crossoverRate) {
     return newPopulation;
 }
 
+// function to mutate the childs
 function mutation (population, mutationRate) {
     let total = 0;
     for(let i=0; i< population.length; i++) {
@@ -106,6 +111,7 @@ function mutation (population, mutationRate) {
     return population;
 }
 
+// function to generate the child object
 function generateChild(x1, x2, apt, sum) {
     return {
         x1: x1,
@@ -115,7 +121,8 @@ function generateChild(x1, x2, apt, sum) {
     }
 }
 
-function rolet(population) {
+// function to select childs
+function roulette(population) {
     let selected = [];
     let minimum = population[0].sum;
     let maximum = population[population.length - 1].sum;
@@ -135,6 +142,7 @@ function rolet(population) {
     return selected;
 }
 
+// function to fill the population with fitness and the sum of fitness
 function fillInitialPopulation(population) {
     let total = 0;
     population.map (element => {
@@ -147,18 +155,22 @@ function fillInitialPopulation(population) {
       return population; 
 }
 
+// function to get the best fitness of each generation
 function getBestApt(population) {
     return population.reduce((apt,element) => apt = element.apt > apt ? element.apt : apt, null );
 }
 
+// function to get the worst fitness of each generation
 function getWorstApt(population) {
     return population.reduce((apt,element) => apt = element.apt < apt ? element.apt : apt, population[0].apt );
 }
 
+// function to get the average fitness of each generation
 function getMediumApt(population) {
     return population.reduce((totalApt, element) => totalApt += element.apt, 0)/population.length; 
 }
 
+// function to generate a Matlab File to plot graphics of the best, worst and average
 function generateMatlabFile(worstData, bestData, mediumData, populationLength){
 	let string = "clc;\n" 
 	string += "clear;\n"
@@ -190,7 +202,7 @@ function main() {
     let population = generatePopulation(populationLength);
     population = fillInitialPopulation(population);
     for(let i=0; i < generations; i++) {
-        population = rolet(population);
+        population = roulette(population);
         population = mutation(crossover(population, crossoverRate), mutationRate);
         best.push(getBestApt(population));
         worst.push(getWorstApt(population));
